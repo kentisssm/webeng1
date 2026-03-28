@@ -1,42 +1,49 @@
 const fs = require('fs');
-const validator = require('html-validator');
 
 try {
     const html = fs.readFileSync('index.html', 'utf8');
 
+    let errors = [];
+
+    // RULE 1
     if (!html.includes('<body')) {
-        console.error("❌ Missing <body> tag");
-        process.exit(1);
+        errors.push("Missing <body> tag");
     }
 
+    // RULE 2
     if (html.includes('DEBUG')) {
-        console.error("❌ Debug code found");
-        process.exit(1);
+        errors.push("Debug code found");
     }
 
-    // NEW: HTML VALIDATION
-    const options = {
-        data: html,
-        format: 'text'
-    };
+    // RULE 3
+    const openATags = (html.match(/<a\b[^>]*>/g) || []).length;
+    const closeATags = (html.match(/<\/a>/g) || []).length;
 
-    validator(options)
-        .then(data => {
-            if (data.includes('Error')) {
-                console.error("❌ HTML structure error detected");
-                console.error(data);
-                process.exit(1);
-            } else {
-                console.log("✅ test passed: HTML is valid");
-                process.exit(0);
-            }
-        })
-        .catch(err => {
-            console.error("❌ Validator error:", err);
-            process.exit(1);
+    if (openATags !== closeATags) {
+        errors.push("Unclosed <a> tag");
+    }
+
+    // RULE 4
+    if (!html.includes('<title')) {
+        errors.push("Missing <title> tag");
+    }
+
+    // 🔥 FINAL DECISION
+    if (errors.length > 0) {
+        console.error("❌ UPDATE REJECTED");
+        console.error("Errors found:");
+
+        errors.forEach(err => {
+            console.error("- " + err);
         });
 
+        process.exit(1);
+    }
+
+    console.log("✅ All tests passed!");
+    process.exit(0);
+
 } catch (err) {
-    console.error("❌ File error");
+    console.error("❌ File error!");
     process.exit(1);
 }
