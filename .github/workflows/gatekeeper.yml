@@ -13,45 +13,24 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Run Tests and Capture Errors
-        id: test_step
-        run: |
-          npm install
-          npm test 2> error.log || true
-          echo "ERROR_LOG<<EOF" >> $GITHUB_OUTPUT
-          cat error.log >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Run Tests
+        run: npm test
 
-      - name: Fail if errors exist
-        run: |
-          if [ -s error.log ]; then
-            exit 1
-          fi
-
-      - name: Automated Feedback on Failure
+      - name: Feedback on Failure
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
             const run_id = context.runId;
             const link = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${run_id}`;
-            const errors = `${{ steps.test_step.outputs.ERROR_LOG }}`;
-
             github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: `❌ UPDATE REJECTED!
-
-Errors found:
-${errors}
-
-🔍 Full logs:
-${link}`
-            });
+              body: `❌ UPDATE REJECTED\nCheck logs: ${link}`
+            })
 
   deploy:
     needs: test
@@ -62,8 +41,7 @@ ${link}`
       id-token: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
