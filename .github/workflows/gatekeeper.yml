@@ -5,35 +5,48 @@ on:
     branches: [ "main" ]
 
 jobs:
-  validate-instructor-push:
+  test-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      statuses: write
-      actions: write
+      pages: write      # Kailangan para sa deployment
+      id-token: write   # Kailangan para sa deployment
       issues: write
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Automatic Testing
+      # STEP 1: RUN YOUR LOGIC (The Gatekeeper)
+      - name: Automatic Testing
         id: run_test
         run: npm test
 
-      # AUTOMATIC RESPONSE KAPAG NAG-FAIL (Instruction Requirement)
-      - name: Report Failure to Instructor
+      # STEP 2: FEEDBACK KAPAG MALI (Dito hihinto ang workflow kung exit 1)
+      - name: Automated Feedback on Failure
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
+            const run_id = context.runId;
+            const link = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${run_id}`;
             github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: "❌ **UPDATE REJECTED!**\n\nHi Instructor! Ang inyong huling commit ay **HINDI PUMASA** sa automatic testing. Pakicheck ang logs sa Actions tab para sa detalye ng error.\n\n⚠️ *Note: This commit should be reverted or fixed to maintain website integrity.*"
+              body: `❌ **UPDATE REJECTED!**\n\nHi Instructor! Ang inyong huling commit ay **HINDI PUMASA** sa automatic testing.\n\n🔍 **Error Details:** Pakicheck ang logs dito: [View Test Results](${link})\n\n⚠️ **Status:** Deployment Cancelled. Hindi nag-update ang live website.`
             })
 
-      # OPTIONAL: MESSAGE KAPAG SUCCESS
-      - name: Report Success
+      # STEP 3: DEPLOY LANG KAPAG SUCCESS (Hinding-hindi ito tatakbo kapag failed ang step 1)
+      - name: Setup Pages
         if: success()
-        run: echo "Update Validated and Passed!"
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: actions/deploy-pages@v4
