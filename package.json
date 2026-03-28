@@ -2,7 +2,7 @@
   "name": "webengP",
   "version": "1.0.0",
   "scripts": {
-    "test": "npx htmlhint \"**/*.html\""
+    "test": "node ./node_modules/htmlhint/bin/htmlhint \"**/*.html\""
   },
   "devDependencies": {
     "htmlhint": "^1.9.2"
