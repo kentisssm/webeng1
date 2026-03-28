@@ -5,17 +5,17 @@ try {
 
     let errors = [];
 
-    // RULE 1
+    // RULE 1: must have <body>
     if (!html.includes('<body')) {
         errors.push("Missing <body> tag");
     }
 
-    // RULE 2
+    // RULE 2: bawal DEBUG
     if (html.includes('DEBUG')) {
         errors.push("Debug code found");
     }
 
-    // RULE 3
+    // RULE 3: detect unclosed <a>
     const openATags = (html.match(/<a\b[^>]*>/g) || []).length;
     const closeATags = (html.match(/<\/a>/g) || []).length;
 
@@ -23,20 +23,16 @@ try {
         errors.push("Unclosed <a> tag");
     }
 
-    // RULE 4
+    // RULE 4: must have <title>
     if (!html.includes('<title')) {
         errors.push("Missing <title> tag");
     }
 
-    // 🔥 FINAL DECISION
+    // FINAL RESULT
     if (errors.length > 0) {
         console.error("❌ UPDATE REJECTED");
         console.error("Errors found:");
-
-        errors.forEach(err => {
-            console.error("- " + err);
-        });
-
+        errors.forEach(err => console.error("- " + err));
         process.exit(1);
     }
 
