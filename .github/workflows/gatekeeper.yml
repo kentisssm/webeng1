@@ -23,7 +23,7 @@ jobs:
 
       - name: Run tests
         run: npm test
-
+        
   deploy:
     needs: test
     if: success()
