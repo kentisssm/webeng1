@@ -2,6 +2,6 @@
   "name": "webengP",
   "version": "1.0.0",
   "scripts": {
-    "test": "node tests/test-logic.js && npx htmlhint index.html"
+   "test": "node tests/test-logic.js && npx htmlhint \"**/*.html\" && npx eslint \"**/*.js\""
   }
 }
