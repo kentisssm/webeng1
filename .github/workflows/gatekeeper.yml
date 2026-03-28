@@ -1,16 +1,18 @@
 name: Instructor Code Gatekeeper
 
 on:
-  pull_request:
-    branches: [ "main" ] # Bantayan ang lahat ng PR na papasok sa main
+  push:
+    branches: [ "main" ]
 
 jobs:
-  test-and-gatekeep:
+  validate-instructor-push:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
+      statuses: write
+      actions: write
       issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
@@ -18,24 +20,20 @@ jobs:
         id: run_test
         run: npm test
 
-      # 1. RESPONSE KAPAG NAG-FAIL (Instruction Requirement)
-      - name: Automated Feedback on Failure
+      # AUTOMATIC RESPONSE KAPAG NAG-FAIL (Instruction Requirement)
+      - name: Report Failure to Instructor
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "❌ **Update Rejected!**\n\nHi Instructor! Ang inyong code ay hindi pumasa sa automatic testing. Pakicheck ang logs para sa error details. Hindi ito mai-me-merge sa main branch."
+              commit_sha: context.sha,
+              body: "❌ **UPDATE REJECTED!**\n\nHi Instructor! Ang inyong huling commit ay **HINDI PUMASA** sa automatic testing. Pakicheck ang logs sa Actions tab para sa detalye ng error.\n\n⚠️ *Note: This commit should be reverted or fixed to maintain website integrity.*"
             })
 
-      # 2. AUTOMATIC MERGE KAPAG VALID (Instruction Requirement)
-      - name: Auto-merge to Main
+      # OPTIONAL: MESSAGE KAPAG SUCCESS
+      - name: Report Success
         if: success()
-        uses: pascalgn/automerge-action@v0.16.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MERGE_METHOD: "merge"
-          MERGE_LABELS: "" # I-merge lahat basta passed
+        run: echo "Update Validated and Passed!"
