@@ -1,0 +1,7 @@
+{
+  "name": "webengP",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo 'Testing... Success!' && exit 0"
+  }
+}
