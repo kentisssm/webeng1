@@ -1,10 +1,8 @@
 name: Instructor Code Gatekeeper
 
 on:
-  push:
-    branches: [ "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ] # Bantayan ang lahat ng PR na papasok sa main
 
 jobs:
   test-and-gatekeep:
@@ -20,24 +18,24 @@ jobs:
         id: run_test
         run: npm test
 
-      # ITO YUNG AUTOMATIC RESPONSE KAPAG NAG-FAIL
+      # 1. RESPONSE KAPAG NAG-FAIL (Instruction Requirement)
       - name: Automated Feedback on Failure
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
             github.rest.issues.createComment({
-              issue_number: context.issue.number || context.payload.pull_request?.number || 0,
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "❌ **Update Rejected!**\n\nHi Instructor! Ang inyong commit ay hindi pumasa sa aming automatic testing. Pakicheck ang logs sa Actions tab para makita ang error sa `npm test`."
+              body: "❌ **Update Rejected!**\n\nHi Instructor! Ang inyong code ay hindi pumasa sa automatic testing. Pakicheck ang logs para sa error details. Hindi ito mai-me-merge sa main branch."
             })
 
-      # AUTOMATIC MERGE KAPAG PASS
+      # 2. AUTOMATIC MERGE KAPAG VALID (Instruction Requirement)
       - name: Auto-merge to Main
         if: success()
         uses: pascalgn/automerge-action@v0.16.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MERGE_METHOD: "merge"
-          MERGE_LABELS: ""
+          MERGE_LABELS: "" # I-merge lahat basta passed
