@@ -2,7 +2,7 @@
   "name": "webengP",
   "version": "1.0.0",
   "scripts": {
-    "test": "htmlhint \"**/*.html\" && stylelint \"**/*.css\" && jsonlint \"**/*.json\""
+    "test": "npx htmlhint \"**/*.html\" && npx stylelint \"**/*.css\" && npx jsonlint \"**/*.json\""
   },
   "devDependencies": {
     "htmlhint": "^1.9.2",
