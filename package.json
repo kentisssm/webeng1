@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "test": "npx htmlhint \"**/*.html\" && npx stylelint \"**/*.css\" && npx jsonlint \"**/*.json\""
+  },
+  "devDependencies": {
+    "stylelint-config-standard": "^40.0.0"
   }
 }
