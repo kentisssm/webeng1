@@ -1,25 +1,42 @@
 const fs = require('fs');
+const validator = require('html-validator');
 
 try {
-    // Halimbawa: I-check natin kung valid ang index.html
     const html = fs.readFileSync('index.html', 'utf8');
 
-    // LOGIC: Kung walang <body> tag, ituturing nating "Mali" ang code.
     if (!html.includes('<body')) {
-        console.error("❌ ERROR: Missing <body> tag! Update Rejected.");
-        process.exit(1); // AUTOMATIC REJECT
+        console.error("❌ Missing <body> tag");
+        process.exit(1);
     }
 
-    // LOGIC: Kung may salitang "DEBUG", i-reject din (bawal sa production).
     if (html.includes('DEBUG')) {
-        console.error("❌ ERROR: Debug code found! Update Rejected.");
-        process.exit(1); // AUTOMATIC REJECT
+        console.error("❌ Debug code found");
+        process.exit(1);
     }
 
-    console.log("✅ test passed: Code is valid.");
-    process.exit(0); // AUTOMATIC ACCEPT
+    // NEW: HTML VALIDATION
+    const options = {
+        data: html,
+        format: 'text'
+    };
+
+    validator(options)
+        .then(data => {
+            if (data.includes('Error')) {
+                console.error("❌ HTML structure error detected");
+                console.error(data);
+                process.exit(1);
+            } else {
+                console.log("✅ test passed: HTML is valid");
+                process.exit(0);
+            }
+        })
+        .catch(err => {
+            console.error("❌ Validator error:", err);
+            process.exit(1);
+        });
 
 } catch (err) {
-    console.error("❌ ERROR: File not found or corrupted.");
+    console.error("❌ File error");
     process.exit(1);
 }
