@@ -1,17 +1,19 @@
-name: Code Gatekeeper - Step 1 (Validation Only)
+name: Code Gatekeeper CI/CD
 
 on:
-  push:
-    branches:
-      - test-branch
+  pull_request:
+    branches: ["main"]
 
 jobs:
-  validate:
+  test:
+    name: Validate Code
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,8 +26,52 @@ jobs:
       - name: Run HTML validation
         run: npm test
 
-      - name: Run JS validation (ESLint)
-        run: npx eslint "**/*.js" || exit 1
+      - name: Run CSS validation
+        run: npx stylelint "**/*.css" --fix
 
-      - name: Run CSS validation (Stylelint)
-        run: npx stylelint "**/*.css" || exit 1
+      - name: Run JS validation
+        run: npx eslint "**/*.js" --fix
+
+  auto-merge:
+    name: Auto Merge PR
+    needs: test
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Enable PR auto-merge
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          merge-method: squash
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: auto-merge
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy Pages
+        uses: actions/deploy-pages@v4
