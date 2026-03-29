@@ -46,17 +46,20 @@ jobs:
           title: "✅ Auto PR (Passed Validation)"
           body: "This PR was automatically created after passing validation."
 
-  auto-merge:
-    runs-on: ubuntu-latest
-    needs: create-pr
-    if: success()
+auto-merge:
+  runs-on: ubuntu-latest
+  needs: create-pr
+  if: success()
 
-    steps:
-      - name: Enable Auto Merge
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          pull-request-number: ${{ needs.create-pr.outputs.pr_number }}
-          merge-method: squash
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Enable Auto Merge
+      uses: peter-evans/enable-pull-request-automerge@v3
+      with:
+        pull-request-number: ${{ needs.create-pr.outputs.pr_number }}
+        merge-method: squash
 
   notify-failure:
     runs-on: ubuntu-latest
