@@ -30,12 +30,10 @@ jobs:
         run: npm test
 
       - name: Run JS validation (ESLint)
-        run: |
-          npx eslint "**/*.js" || exit 1
+        run: npx eslint "**/*.js" || exit 1
 
-      - name: Run CSS validation (stylelint)
-        run: |
-          npx stylelint "**/*.css" || exit 1
+      - name: Run CSS validation (Stylelint)
+        run: npx stylelint "**/*.css" || exit 1
 
   create-pr:
     runs-on: ubuntu-latest
