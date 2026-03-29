@@ -65,8 +65,8 @@ jobs:
             echo "✅ PR found: #$PR_NUMBER"
             gh pr merge $PR_NUMBER --squash --auto
           fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify-failure:
     runs-on: ubuntu-latest
