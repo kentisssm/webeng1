@@ -54,12 +54,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
-      - name: Enable Auto Merge
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          pull-request-number: ${{ needs.create-pr.outputs.pr_number }}
-          merge-method: squash
+
+      - name: Auto merge PR
+        run: |
+          gh pr merge test-branch --squash --auto --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   notify-failure:
     runs-on: ubuntu-latest
