@@ -1,0 +1,31 @@
+name: Code Gatekeeper - Step 1 (Validation Only)
+
+on:
+  push:
+    branches:
+      - test-branch
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run HTML validation
+        run: npm test
+
+      - name: Run JS validation (ESLint)
+        run: npx eslint "**/*.js" || exit 1
+
+      - name: Run CSS validation (Stylelint)
+        run: npx stylelint "**/*.css" || exit 1
