@@ -6,19 +6,13 @@ on:
 
 jobs:
   test:
-    name: Validate Code
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
 
       - name: Install dependencies
         run: npm install
@@ -32,46 +26,18 @@ jobs:
       - name: Run JS validation
         run: npx eslint "**/*.js" --fix
 
-  auto-merge:
-    name: Auto Merge PR
+  deploy:
     needs: test
     if: success()
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Enable PR auto-merge
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          merge-method: squash
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: auto-merge
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
 
     permissions:
       pages: write
       id-token: write
 
     steps:
-      - name: Checkout main
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-      - name: Deploy Pages
-        uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: '.' }
+      - uses: actions/deploy-pages@v4s
